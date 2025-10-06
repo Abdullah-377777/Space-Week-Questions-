@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الفضاء - رحلة إلى النجوم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1447 50%, #2d1b69 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            background: linear-gradient(45deg, #00d4ff, #7b2ff7, #f94892);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(123, 47, 247, 0.5);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #a8b2d1;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 212, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item .label {
+            font-size: 0.9em;
+            color: #a8b2d1;
+            margin-bottom: 5px;
+        }
+
+        .score-item .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .question {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: #fff;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(123, 47, 247, 0.2);
+            border-radius: 15px;
+            border-right: 5px solid #7b2ff7;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            transform: translateX(-5px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #00d4ff, #7b2ff7);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .option:hover::before {
+            transform: scaleY(1);
+        }
+
+        .option.correct {
+            background: rgba(46, 213, 115, 0.2);
+            border-color: #2ed573;
+            animation: pulse 0.5s;
+        }
+
+        .option.wrong {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: #ff4757;
+            animation: shake 0.5s;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(249, 72, 146, 0.15);
+            border-radius: 15px;
+            border-right: 5px solid #f94892;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .explanation h3 {
+            color: #f94892;
+            margin-bottom: 10px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-next {
+            background: linear-gradient(45deg, #7b2ff7, #f94892);
+            color: white;
+            box-shadow: 0 5px 20px rgba(123, 47, 247, 0.4);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(123, 47, 247, 0.6);
+        }
+
+        .btn-restart {
+            background: linear-gradient(45deg, #00d4ff, #2ed573);
+            color: white;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 50px;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        .result-emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .result-score {
+            font-size: 3em;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-message {
+            font-size: 1.5em;
+            color: #a8b2d1;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7, #f94892);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚀 رحلة إلى الفضاء 🌟</h1>
+            <p>اختبر معلوماتك عن الفضاء بطريقة ممتعة ومسلية!</p>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <div class="label">السؤال</div>
+                <div class="value"><span id="currentQ">1</span> / <span id="totalQ">15</span></div>
+            </div>
+            <div class="score-item">
+                <div class="label">النتيجة</div>
+                <div class="value" id="score">0</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <div class="quiz-card" id="quizCard">
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="explanation" id="explanation">
+                <h3>💡 التفسير:</h3>
+                <p id="explanationText"></p>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-next" id="nextBtn" disabled>السؤال التالي</button>
+            </div>
+        </div>
+
+        <div class="quiz-card result-card" id="resultCard">
+            <div class="result-emoji" id="resultEmoji">🎉</div>
+            <div class="result-score" id="finalScore"></div>
+            <div class="result-message" id="resultMessage"></div>
+            <div class="nav-buttons">
+                <button class="btn btn-restart" onclick="restartQuiz()">ابدأ من جديد</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "لو عايش على المريخ، وش تاكل عشان ما تموت من الجوع؟",
+                options: [
+                    "فلافل وشاورما من مطعم المريخ السريع!",
+                    "نباتات تزرعها في مزرعة فضائية بتقنية الهايدروبونيك.",
+                    "بيتزا مجمدة توصيل من الأرض!",
+                    "حبوب طاقة مضغوطة بس طعمها زي الحلاوة."
+                ],
+                correct: 1,
+                explanation: "عشان الزراعة الفضائية هي الحل المستدام للعيش في الفضاء، والطلاب رح ينبسطون من خيار الشاورما!"
+            },
+            {
+                q: "إذا نسيت قهوتك السعودية في محطة الفضاء، وش اللي يصير لها؟",
+                options: [
+                    "تطير وتصير كور زي الفقاعات في الهواء!",
+                    "تتجمد على طول وتصير ثلج بنكهة قهوة.",
+                    "تتحول لسائل غريب يلمع زي النجوم.",
+                    "تبقى زي ما هي، بس رحت فيها ما تشربها."
+                ],
+                correct: 0,
+                explanation: "في انعدام الجاذبية، السوائل تطفو على شكل كرات بسبب التوتر السطحي، وهذا شيء بيخلي الطلاب يتخيلون القهوة تطير!"
+            },
+            {
+                q: "السعودية أطلقت قمر اسمه Centroid عام 2023، وش كان شغله؟",
+                options: [
+                    "يلعب ببجي مع الأقمار الصناعية الثانية!",
+                    "يراقب الأرض ويساعد في تطوير تقنيات الفضاء.",
+                    "يصور سيلفي للكواكب ويرسلها لنا.",
+                    "يوزع واي فاي مجاني لرواد الفضاء."
+                ],
+                correct: 1,
+                explanation: "Centroid كان أول قمر سعودي يختبر تقنيات متقدمة، والخيارات الغريبة زي 'ببجي' رح تجذب الطلاب."
+            },
+            {
+                q: "لو تبغى تبني بيت على القمر، وش تستخدم عشان ما يطير؟",
+                options: [
+                    "طين القمر (الرغليت) مع طابعة ثلاثية الأبعاد.",
+                    "ألواح حديد من الأرض وتشحنها بالصاروخ.",
+                    "غراء سوبر قلو من البقالة!",
+                    "خيام زي اللي في البر، بس لونها فضي."
+                ],
+                correct: 0,
+                explanation: "الرغليت مادة القمر نفسها، ويستخدمونها لبناء قواعد بتقنيات حديثة، والطلاب رح يحبون فكرة 'الغراء'!"
+            },
+            {
+                q: "وش اللي يخلي رائد الفضاء السعودي علي القرني مميز في مهمته 2023؟",
+                options: [
+                    "أخذ تمر معاه وسوى دعاية للتمر السعودي في الفضاء!",
+                    "أول سعودي يروح محطة الفضاء الدولية ويجرب تجارب علمية.",
+                    "رقّص العرضة على انعدام الجاذبية.",
+                    "صمم بدلة فضاء بنكهة سعودية."
+                ],
+                correct: 1,
+                explanation: "علي القرني فعلاً كان أول سعودي في ISS، والخيارات المضحكة زي 'العرضة' رح تخلي الطلاب يضحكون."
+            },
+            {
+                q: "إذا تبغى تتنفس على المريخ، وش لازم تسوي؟",
+                options: [
+                    "تاخذ أكسجين معبأ في علب زي الكولا.",
+                    "تستخدم جهاز يحول ثاني أكسيد الكربون لأكسجين.",
+                    "تزرع شجر في خيمة على المريخ وتستنى.",
+                    "تتنفس عادي، المريخ زي جدة!"
+                ],
+                correct: 1,
+                explanation: "أجهزة مثل MOXIE (في مسبار ناسا) تحول CO2 إلى أكسجين، وخيار 'المريخ زي جدة' رح يضحكهم!"
+            },
+            {
+                q: "لو عايش في محطة فضاء، وش أغرب مشكلة تواجهك؟",
+                options: [
+                    "النوم! عشان تطفو وما تقدر تنام زي الناس.",
+                    "الإنترنت بطيء وما تقدر تشوف نيتفلكس.",
+                    "الطعام يجيك زي معجون الأسنان.",
+                    "كلها صحيحة، الفضاء غريب!"
+                ],
+                correct: 3,
+                explanation: "النوم يحتاج أكياس نوم مثبتة، والطعام غالبًا معجون، والإنترنت بطيء فعلاً، فهذا بيخلي الطلاب ينبسطون من غرابة الحياة في الفضاء."
+            },
+            {
+                q: "لو تبغى تتصل بصاحبك من محطة الفضاء، وش أغرب مشكلة تواجهك؟",
+                options: [
+                    "الصوت يتأخر ثواني وكأنك تكلم واحد في كوكب ثاني!",
+                    "لازم ترسل رسالة بالدخان زي القبائل القديمة.",
+                    "الجوال يطفو ويروح يصدم بالسقف.",
+                    "ما فيه مشكلة، زي واتساب عادي!"
+                ],
+                correct: 0,
+                explanation: "بسبب المسافة الكبيرة، الإشارة تأخذ وقت، وهذا بيخلي الطلاب يتخيلون المكالمة الفضائية."
+            },
+            {
+                q: "إذا عايش على المريخ، وش الرياضة اللي ممكن تلعبها؟",
+                options: [
+                    "كرة قدم بس الكرة تطير بعيد عشان الجاذبية ضعيفة.",
+                    "سباق دراجات على رمال المريخ الحمراء.",
+                    "تنس بس المضرب يطفو ويخرب اللعبة.",
+                    "كلها، بس لازم بدلة فضاء!"
+                ],
+                correct: 3,
+                explanation: "الجاذبية الضعيفة (38% من الأرض) تخلي الرياضة غريبة، بس ممكن تلعب أي شيء مع بدلة فضاء، والطلاب رح يحبون فكرة الكرة تطير!"
+            },
+            {
+                q: "السعودية بتساهم في الفضاء، وش اللي ممكن نشوفه قريب؟",
+                options: [
+                    "مطعم سعودي في محطة الفضاء يقدم كبسة مضغوطة!",
+                    "مركز أبحاث سعودي يصمم تقنيات للعيش على القمر.",
+                    "صاروخ يشغل أغاني عبدالمجيد عبدالله وهو طاير.",
+                    "روبوت سعودي يرقص المزمار على المريخ."
+                ],
+                correct: 1,
+                explanation: "وكالة الفضاء السعودية فعلاً تعمل على مشاريع طموحة زي أبحاث القمر، وخيار الكبسة رح يضحك الطلاب."
+            },
+            {
+                q: "لو تبغى تسوي إنستغرام فضائي، وش تصوّر؟",
+                options: [
+                    "سيلفي مع غروب الشمس على المريخ (ألوانه خيالية!).",
+                    "فيديو لك وأنت تطفو في محطة الفضاء وتشرب عصير.",
+                    "صورة للأرض من بعيد زي الكرة الزرقا.",
+                    "كلها، بس لازم فلتر فضائي!"
+                ],
+                correct: 3,
+                explanation: "كل الصور هذي ممكنة وتكون مشهورة على إنستغرام فضائي، والخيار الأخير يضيف نكهة ممتعة."
+            },
+            {
+                q: "وش التحدي الأكبر لو تبغى تبني مدينة على القمر؟",
+                options: [
+                    "ما فيه كافيهات تقدم قهوة زي الناس!",
+                    "الحماية من الإشعاعات الكونية اللي تضرب القمر.",
+                    "النت يفصل كل شوي بسبب الرياح الشمسية.",
+                    "الناس يزهقون عشان ما فيه مولات."
+                ],
+                correct: 1,
+                explanation: "القمر ما عنده غلاف جوي، فالإشعاع مشكلة كبيرة، وخيار الكافيهات رح يخلي الطلاب يضحكون."
+            },
+            {
+                q: "لو صار انقطاع كهربا في محطة الفضاء، وش تسوي؟",
+                options: [
+                    "تشغل مولد ديزل زي اللي في الحارة!",
+                    "تعتمد على ألواح شمسية احتياطية.",
+                    "تضيء شموع وتسوي جلسة فلكلورية.",
+                    "ترسل رسالة لناسا يجيبون بطاريات."
+                ],
+                correct: 1,
+                explanation: "محطات الفضاء زي ISS تعتمد على الطاقة الشمسية، وخيار الشموع رح يكون مضحك لأنه مستحيل في الفضاء."
+            },
+            {
+                q: "لو تبغى ترسل هدية لصديقك على المريخ، وش تختار؟",
+                options: [
+                    "علبة تمر سكري في علبة فضائية فخمة.",
+                    "جهاز يصنع أكسجين عشان يتنفس براحته.",
+                    "نظارة VR تلعب فيها ألعاب فضاء.",
+                    "كلها، بس لازم صاروخ توصيل سريع!"
+                ],
+                correct: 1,
+                explanation: "الأكسجين أهم شيء للعيش، بس خيار التمر السكري رح يعجبهم لأنه سعودي 100%!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const q = questions[currentQuestion];
+            document.getElementById('question').textContent = q.q;
+            document.getElementById('currentQ').textContent = currentQuestion + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('explanation').classList.remove('show');
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                div.onclick = () => selectOption(index);
+                optionsContainer.appendChild(div);
+            });
+
+            updateProgress();
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((opt, i) => {
+                opt.classList.add('disabled');
+                if (i === q.correct) {
+                    opt.classList.add('correct');
+                }
+                if (i === index && i !== q.correct) {
+                    opt.classList.add('wrong');
+                }
+            });
+
+            if (index === q.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+
+            document.getElementById('explanationText').textContent = q.explanation;
+            document.getElementById('explanation').classList.add('show');
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('quizCard').style.display = 'none';
+            const resultCard = document.getElementById('resultCard');
+            resultCard.classList.add('show');
+
+            const percentage = (score / questions.length) * 100;
+            let emoji, message;
+
+            if (percentage >= 90) {
+                emoji = '🏆';
+                message = 'رائع! أنت عالم فضاء حقيقي!';
+            } else if (percentage >= 70) {
+                emoji = '🌟';
+                message = 'ممتاز! معلوماتك عن الفضاء رهيبة!';
+            } else if (percentage >= 50) {
+                emoji = '👍';
+                message = 'جيد! لكن تحتاج لمزيد من المعرفة الفضائية!';
+            } else {
+                emoji = '🚀';
+                message = 'لا بأس! لكن عليك بالمزيد من القراءة عن الفضاء!';
+            }
+
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('finalScore').textContent = score + ' / ' + questions.length;
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('resultCard').classList.remove('show');
+            document.getElementById('quizCard').style.display = 'block';
+            loadQuestion();
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+
+        createStars();
+        loadQuestion();
+    </script>
+</body>
+</html>
