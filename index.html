@@ -641,13 +641,13 @@
             const percentage = (score / questions.length) * 100;
             let emoji, message;
 
-            if (percentage >= 90) {
+            if (percentage >= 70) {
                 emoji = '🏆';
                 message = '!رائع! لايكون انت رائد فضاء واحنا ما ندري!!';
-            } else if (percentage >= 70) {
+            } else if (percentage >= 50) {
                 emoji = '🌟';
                 message = 'ممتاز! معلوماتك عن الفضاء رهيبة!';
-            } else if (percentage >= 50) {
+            } else if (percentage >= 30) {
                 emoji = '👍';
                 message = 'بداية طريق ان تكون رائدة فضاء';
             } else {
