@@ -630,6 +630,7 @@
 
         function showResults() {
             document.getElementById('quizCard').style.display = 'none';
+            document.getElementById('resultCard').style.display = 'block';
             const resultCard = document.getElementById('resultCard');
             resultCard.classList.add('show');
 
@@ -638,16 +639,16 @@
 
             if (percentage >= 90) {
                 emoji = '🏆';
-                message = 'رائع! أنت عالم فضاء حقيقي!';
+                message = '!رائع! لايكون انت رائد فضاء واحنا ما ندري!!';
             } else if (percentage >= 70) {
                 emoji = '🌟';
                 message = 'ممتاز! معلوماتك عن الفضاء رهيبة!';
             } else if (percentage >= 50) {
                 emoji = '👍';
-                message = 'جيد! لكن تحتاج لمزيد من المعرفة الفضائية!';
+                message = 'بداية طريق ان تكون رائدة فضاء';
             } else {
                 emoji = '🚀';
-                message = 'لا بأس! لكن عليك بالمزيد من القراءة عن الفضاء!';
+                message = 'ابدأ تعلم و تثقف عن الفضاء';
             }
 
             document.getElementById('resultEmoji').textContent = emoji;
