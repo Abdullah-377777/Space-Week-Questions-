@@ -629,10 +629,10 @@
         }
 
         function showResults() {
-            document.getElementById('quizCard').style.display = 'none';
-            document.getElementById('resultCard').style.display = 'block';
-            const resultCard = document.getElementById('resultCard');
-            resultCard.classList.add('show');
+              document.getElementById('quizCard').style.display = 'none';
+  const resultCard = document.getElementById('resultCard');
+  resultCard.classList.add('show');
+
 
             const percentage = (score / questions.length) * 100;
             let emoji, message;
